@@ -19,7 +19,7 @@ const std::string FragmentSource =
     "\n"
     "void main()\n"
     "{\n"
-    "   color = vec4(1.0, 0.2, 0.5, 1.0);\n"
+    "   color = vec4(1.0, 0.2, 0.3, 1.0);\n"
     "}\n";
 
 int main(void)
