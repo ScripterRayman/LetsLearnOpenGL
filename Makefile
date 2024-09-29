@@ -1,18 +1,23 @@
 # Compiler and flags
 CXX = clang++
-CXXFLAGS = -std=c++2a -I/usr/include -I/usr/local/include $(shell pkg-config --cflags glfw3)
-LDFLAGS = $(shell pkg-config --libs glfw3)
-LIBS = -lGLEW -lGL
+CXXFLAGS = -std=c++17 -Wall -Wextra
 
-# Source files and executable
+# Source file
 SRC = main.cpp
-EXEC = main
 
-# Targets
-all: $(EXEC)
+# Output binary
+TARGET = main
 
-$(EXEC):
-	$(CXX) $(SRC) $(CXXFLAGS) $(LDFLAGS) $(LIBS) -o $(EXEC)
+# Libraries to link
+LIBS = -lglfw -lGLEW -lGL
 
+# Includes (adjust these paths if your GLM headers are elsewhere)
+INCLUDES = -I/usr/include
+
+# Build the project
+$(TARGET): $(SRC)
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(SRC) -o $(TARGET) $(LIBS)
+
+# Clean the build
 clean:
-	rm -f $(EXEC)
+	rm -f $(TARGET)
