@@ -12,8 +12,6 @@
     MEANTAL NOTE:  Remember to cinvert to glDebugMessageCallback() for better error handling
 */
 
-
-
 struct ShaderProgramSource
 {
     std::string VertexSource;
@@ -137,58 +135,61 @@ int main(void)
         return 1;
     }
 
-    float vertices[] = {
-         0.5f,  0.5f,
-         0.5f, -0.5f,
-        -0.5f,  0.5f,
-        -0.5f, -0.5f
-    };
-
-    unsigned int indices[] = {
-        3, 2, 0,
-        3, 0, 1
-    };
-
-    unsigned int vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    VertexBuffer vbo(vertices, 2 * 4 * sizeof(float));
-
-    IndexBuffer ibo(indices, 6);
-
-    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0));
-    GLCall(glEnableVertexAttribArray(0));
-
-    ShaderProgramSource source = ParseShaders("res/shaders/main.shader");
-    unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
-    glUseProgram(shader);
-
-    glBindVertexArray(0);
-    glUseProgram(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // Extremely dark gray, very close to black
-
-    /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window))
     {
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
+        float vertices[] = {
+            0.5f,  0.5f,
+            0.5f, -0.5f,
+            -0.5f,  0.5f,
+            -0.5f, -0.5f
+        };
 
+        unsigned int indices[] = {
+            3, 2, 0,
+            3, 0, 1
+        };
+
+        unsigned int vao;
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
+
+        VertexBuffer vbo(vertices, 2 * 4 * sizeof(float));
+
+        IndexBuffer ibo(indices, 6);
+
+        GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0));
+        GLCall(glEnableVertexAttribArray(0));
+
+        ShaderProgramSource source = ParseShaders("res/shaders/main.shader");
+        unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
         glUseProgram(shader);
 
-        glBindVertexArray(vao);
-        ibo.Bind();
+        glBindVertexArray(0);
+        glUseProgram(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
+        glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // Extremely dark gray, very close to black
 
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
+        /* Loop until the user closes the window */
+        while (!glfwWindowShouldClose(window))
+        {
+            /* Render here */
+            glClear(GL_COLOR_BUFFER_BIT);
 
-        /* Poll for and process events */
-        glfwPollEvents();
+            glUseProgram(shader);
+
+            glBindVertexArray(vao);
+            ibo.Bind();
+
+            GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
+
+            /* Swap front and back buffers */
+            glfwSwapBuffers(window);
+
+            /* Poll for and process events */
+            glfwPollEvents();
+        }
+        GLCall(glDeleteProgram(shader));
     }
 
     glfwTerminate();
