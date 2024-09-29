@@ -3,7 +3,7 @@ CXX = clang++
 CXXFLAGS = -std=c++17 -Wall -Wextra
 
 # Source file
-SRC = main.cpp
+SRC = main.cpp buffers.cpp renderer.cpp
 
 # Output binary
 TARGET = main

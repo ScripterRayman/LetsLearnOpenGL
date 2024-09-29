@@ -5,32 +5,14 @@
 #include <fstream>
 #include <sstream>
 
+#include "renderer.h"
+#include "buffers.h"
+
 /*
     MEANTAL NOTE:  Remember to cinvert to glDebugMessageCallback() for better error handling
 */
 
-#define ASSERT(x) if (!(x)) {std::cerr << " YOU HAVE AN ERROR .... FIX IT !!!!!!" << std::endl;\
-    break;}
 
-#define GLCall(x) GLClearError();\
-    x;\
-    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
-
-static void GLClearError()
-{
-    while (glGetError() != GL_NO_ERROR);
-}
-
-static bool GLLogCall(const char *function, const char *file, int line)
-{
-    while (GLenum error = glGetError())
-    {
-        std::cerr << "[OpenGL ERROR]: " << "(" << error << ")" << " " << function << " " << file << " : " << line << std::endl;
-        return false;
-    }
-
-    return true;
-}
 
 struct ShaderProgramSource
 {
@@ -128,12 +110,21 @@ int main(void)
 
     /* Initialize the library */
     if (!glfwInit())
+    {
+        std::cerr << "Failed to initialize GLFW!" << std::endl;
         return 1;
+    }
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(640, 480, "Hello World", nullptr, nullptr);
     if (!window)
     {
+        std::cerr << "Failed to Create a Window!" << std::endl;
+
         glfwTerminate();
         return 1;
     }
@@ -158,22 +149,25 @@ int main(void)
         3, 0, 1
     };
 
-    unsigned int buffer;
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, 2 * 4 * sizeof(float), vertices, GL_STATIC_DRAW);
+    unsigned int vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
-    unsigned int indexBuffer;
-    glGenBuffers(1, &indexBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 2 * 3 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+    VertexBuffer vbo(vertices, 2 * 4 * sizeof(float));
 
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(0);
+    IndexBuffer ibo(indices, 6);
+
+    GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0));
+    GLCall(glEnableVertexAttribArray(0));
 
     ShaderProgramSource source = ParseShaders("res/shaders/main.shader");
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
     glUseProgram(shader);
+
+    glBindVertexArray(0);
+    glUseProgram(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // Extremely dark gray, very close to black
 
@@ -182,6 +176,11 @@ int main(void)
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glUseProgram(shader);
+
+        glBindVertexArray(vao);
+        ibo.Bind();
 
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
 
