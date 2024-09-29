@@ -5,6 +5,33 @@
 #include <fstream>
 #include <sstream>
 
+/*
+    MEANTAL NOTE:  Remember to cinvert to glDebugMessageCallback() for better error handling
+*/
+
+#define ASSERT(x) if (!(x)) {std::cerr << " YOU HAVE AN ERROR .... FIX IT !!!!!!" << std::endl;\
+    break;}
+
+#define GLCall(x) GLClearError();\
+    x;\
+    ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+
+static void GLClearError()
+{
+    while (glGetError() != GL_NO_ERROR);
+}
+
+static bool GLLogCall(const char *function, const char *file, int line)
+{
+    while (GLenum error = glGetError())
+    {
+        std::cerr << "[OpenGL ERROR]: " << "(" << error << ")" << " " << function << " " << file << " : " << line << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
 struct ShaderProgramSource
 {
     std::string VertexSource;
@@ -148,13 +175,15 @@ int main(void)
     unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);
     glUseProgram(shader);
 
+    glClearColor(0.02f, 0.02f, 0.02f, 1.0f); // Extremely dark gray, very close to black
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
